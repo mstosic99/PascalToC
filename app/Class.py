@@ -41,6 +41,8 @@ class Class(Enum):
     CHAR = auto()
     STRING = auto()
     BOOL = auto()
+    REAL = auto()
+    ARRAY = auto()
 
     PROCEDURE = auto()
     FUNCTION = auto()

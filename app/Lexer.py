@@ -18,6 +18,19 @@ class Lexer:
             lexeme += self.advance_pos()
         return int(lexeme)
 
+    def read_num(self):
+        lexeme = self.text[self.pos]
+        while self.pos + 1 < self.len and self.text[self.pos + 1].isdigit():
+            lexeme += self.advance_pos()
+        if self.pos + 1 < self.len and self.text[self.pos + 1] == '.' and self.text[self.pos + 2] != '.':
+            lexeme += self.text[self.pos + 1]
+            self.advance_pos()
+            while self.pos + 1 < self.len and self.text[self.pos + 1].isdigit():
+                lexeme += self.advance_pos()
+            return Token(Class.REAL, float(lexeme))
+        else:
+            return Token(Class.INT, int(lexeme))
+
     def read_char(self):
         self.pos += 1
         lexeme = self.text[self.pos]
@@ -79,6 +92,8 @@ class Lexer:
             return Token(Class.FUNCTION, lexeme)
         elif lexeme == 'of':
             return Token(Class.OF, lexeme)
+        elif lexeme == 'array':
+            return Token(Class.ARRAY, lexeme)
         return Token(Class.ID, lexeme)
 
     def advance_pos(self):
@@ -96,18 +111,16 @@ class Lexer:
         if curr.isalpha():
             token = self.read_keyword()
         elif curr.isdigit():
-            token = Token(Class.INT, self.read_int())
+            token = self.read_num()
         elif curr == '\'':
             self.advance_pos()
             curr = self.advance_pos()
-            if curr.isalnum():
-                self.pos -= 2
-                token = Token(Class.CHAR, self.read_string())
-            elif curr == '\'':
+            if curr == '\'':
                 self.pos -= 2
                 token = Token(Class.CHAR, self.read_char())
             else:
-                self.die(curr)
+                self.pos -= 2
+                token = Token(Class.CHAR, self.read_string())
         elif curr == '+':
             token = Token(Class.PLUS, curr)
         elif curr == '-':
@@ -119,7 +132,7 @@ class Lexer:
         elif curr == '.':
             curr = self.advance_pos()
             if curr == '.':
-                token = Token(Class.DDOT, curr)
+                token = Token(Class.DDOT, '..')
             else:
                 self.pos -= 1
                 token = Token(Class.DOT, '.')
