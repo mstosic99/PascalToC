@@ -2,8 +2,8 @@ from os import getcwd
 
 from app.Lexer import Lexer
 
-test_id = 8
-path = f'{getcwd()}/data/c/test{test_id}.c'
+test_id = 3
+path = f'{getcwd()}/data/pas/test{test_id}.pas'
 
 with open(path, 'r') as source:
 

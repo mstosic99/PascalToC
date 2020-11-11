@@ -10,12 +10,12 @@ class Lexer:
 
     def read_space(self):
         while self.pos + 1 < self.len and self.text[self.pos + 1].isspace():
-            self.next_char()
+            self.advance_pos()
 
     def read_int(self):
         lexeme = self.text[self.pos]
         while self.pos + 1 < self.len and self.text[self.pos + 1].isdigit():
-            lexeme += self.next_char()
+            lexeme += self.advance_pos()
         return int(lexeme)
 
     def read_char(self):
@@ -26,15 +26,15 @@ class Lexer:
 
     def read_string(self):
         lexeme = ''
-        while self.pos + 1 < self.len and self.text[self.pos + 1] != '"':
-            lexeme += self.next_char()
+        while self.pos + 1 < self.len and self.text[self.pos + 1] != '\'':
+            lexeme += self.advance_pos()
         self.pos += 1
         return lexeme
 
     def read_keyword(self):
         lexeme = self.text[self.pos]
         while self.pos + 1 < self.len and self.text[self.pos + 1].isalnum():
-            lexeme += self.next_char()
+            lexeme += self.advance_pos()
         if lexeme == 'if':
             return Token(Class.IF, lexeme)
         elif lexeme == 'else':
@@ -43,17 +43,45 @@ class Lexer:
             return Token(Class.WHILE, lexeme)
         elif lexeme == 'for':
             return Token(Class.FOR, lexeme)
+        elif lexeme == 'do':
+            return Token(Class.DO, lexeme)
+        elif lexeme == 'to':
+            return Token(Class.TO, lexeme)
         elif lexeme == 'break':
             return Token(Class.BREAK, lexeme)
         elif lexeme == 'continue':
             return Token(Class.CONTINUE, lexeme)
         elif lexeme == 'return':
             return Token(Class.RETURN, lexeme)
-        elif lexeme == 'int' or lexeme == 'char' or lexeme == 'void':
+        elif lexeme == 'integer' or lexeme == 'char' or lexeme == 'boolean' or lexeme == 'string' or lexeme == 'real':
             return Token(Class.TYPE, lexeme)
+        elif lexeme == 'begin':
+            return Token(Class.BEGIN, lexeme)
+        elif lexeme == 'end':
+            return Token(Class.END, lexeme)
+        elif lexeme == 'var':
+            return Token(Class.VAR, lexeme)
+        elif lexeme == 'div':
+            return Token(Class.DIV, lexeme)
+        elif lexeme == 'mod':
+            return Token(Class.MOD, lexeme)
+        elif lexeme == 'true' or lexeme == 'false':
+            return Token(Class.BOOL, lexeme)
+        elif lexeme == 'exit':
+            return Token(Class.EXIT, lexeme)
+        elif lexeme == 'repeat':
+            return Token(Class.REPEAT, lexeme)
+        elif lexeme == 'until':
+            return Token(Class.UNTIL, lexeme)
+        elif lexeme == 'procedure':
+            return Token(Class.PROCEDURE, lexeme)
+        elif lexeme == 'function':
+            return Token(Class.FUNCTION, lexeme)
+        elif lexeme == 'of':
+            return Token(Class.OF, lexeme)
         return Token(Class.ID, lexeme)
 
-    def next_char(self):
+    def advance_pos(self):
         self.pos += 1
         if self.pos >= self.len:
             return None
@@ -61,7 +89,7 @@ class Lexer:
 
     def next_token(self):
         self.read_space()
-        curr = self.next_char()
+        curr = self.advance_pos()
         if curr is None:
             return Token(Class.EOF, curr)
         token = None
@@ -70,9 +98,16 @@ class Lexer:
         elif curr.isdigit():
             token = Token(Class.INT, self.read_int())
         elif curr == '\'':
-            token = Token(Class.CHAR, self.read_char())
-        elif curr == '"':
-            token = Token(Class.STRING, self.read_string())
+            self.advance_pos()
+            curr = self.advance_pos()
+            if curr.isalnum():
+                self.pos -= 2
+                token = Token(Class.CHAR, self.read_string())
+            elif curr == '\'':
+                self.pos -= 2
+                token = Token(Class.CHAR, self.read_char())
+            else:
+                self.die(curr)
         elif curr == '+':
             token = Token(Class.PLUS, curr)
         elif curr == '-':
@@ -81,44 +116,55 @@ class Lexer:
             token = Token(Class.STAR, curr)
         elif curr == '/':
             token = Token(Class.FWDSLASH, curr)
-        elif curr == '%':
-            token = Token(Class.PERCENT, curr)
+        elif curr == '.':
+            curr = self.advance_pos()
+            if curr == '.':
+                token = Token(Class.DDOT, curr)
+            else:
+                self.pos -= 1
+                token = Token(Class.DOT, '.')
         elif curr == '&':
-            curr = self.next_char()
+            curr = self.advance_pos()
             if curr == '&':
                 token = Token(Class.AND, '&&')
             else:
                 token = Token(Class.ADDRESS, '&')
                 self.pos -= 1
         elif curr == '|':
-            curr = self.next_char()
+            curr = self.advance_pos()
             if curr == '|':
                 token = Token(Class.OR, '||')
             else:
                 self.die(curr)
         elif curr == '!':
-            curr = self.next_char()
+            curr = self.advance_pos()
             if curr == '=':
                 token = Token(Class.NEQ, '!=')
             else:
                 token = Token(Class.NOT, '!')
                 self.pos -= 1
         elif curr == '=':
-            curr = self.next_char()
-            if curr == '=':
-                token = Token(Class.EQ, '==')
+            curr = self.advance_pos()
+            if curr == ' ':
+                token = Token(Class.EQ, '=')
             else:
-                token = Token(Class.ASSIGN, '=')
+                self.die(curr)
+        elif curr == ':':
+            curr = self.advance_pos()
+            if curr == '=':
+                token = Token(Class.ASSIGN, ':=')
+            else:
+                token = Token(Class.COLON, ':')
                 self.pos -= 1
         elif curr == '<':
-            curr = self.next_char()
+            curr = self.advance_pos()
             if curr == '=':
                 token = Token(Class.LTE, '<=')
             else:
                 token = Token(Class.LT, '<')
                 self.pos -= 1
         elif curr == '>':
-            curr = self.next_char()
+            curr = self.advance_pos()
             if curr == '=':
                 token = Token(Class.GTE, '>=')
             else:

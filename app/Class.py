@@ -1,12 +1,14 @@
 
 from enum import Enum, auto
 
+
 class Class(Enum):
     PLUS = auto()
     MINUS = auto()
     STAR = auto()
     FWDSLASH = auto()
-    PERCENT = auto()
+    DIV = auto()
+    MOD = auto()
 
     OR = auto()
     AND = auto()
@@ -28,17 +30,30 @@ class Class(Enum):
 
     ASSIGN = auto()
     SEMICOLON = auto()
+    COLON = auto()
     COMMA = auto()
+    DOT = auto()
+    DDOT = auto()
 
+    VAR = auto()
     TYPE = auto()
     INT = auto()
     CHAR = auto()
     STRING = auto()
+    BOOL = auto()
+
+    PROCEDURE = auto()
+    FUNCTION = auto()
 
     IF = auto()
     ELSE = auto()
     WHILE = auto()
     FOR = auto()
+    DO = auto()
+    TO = auto()
+    REPEAT = auto()
+    UNTIL = auto()
+    OF = auto()
 
     BEGIN = auto()
     END = auto()
@@ -48,6 +63,8 @@ class Class(Enum):
     RETURN = auto()
 
     ADDRESS = auto()
+
+    EXIT = auto()
 
     ID = auto()
     EOF = auto()
