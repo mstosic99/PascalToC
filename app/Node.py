@@ -17,10 +17,11 @@ class Decl(Node):
 
 
 class ArrayDecl(Node):
-    def __init__(self, type_, id_, size, elems):
+    def __init__(self, type_, id_, from_, to_, elems):
         self.type_ = type_
         self.id_ = id_
-        self.size = size
+        self.from_ = from_
+        self.to_ = to_
         self.elems = elems
 
 
@@ -28,6 +29,13 @@ class ArrayElem(Node):
     def __init__(self, id_, index):
         self.id_ = id_
         self.index = index
+
+
+class StringDecl(Node):
+    def __init__(self, type_, id_, size):
+        self.type_ = type_
+        self.id_ = id_
+        self.size = size
 
 
 class Assign(Node):
@@ -56,10 +64,9 @@ class RepeatUntil(Node):
 
 
 class For(Node):
-    def __init__(self, init, cond, step, block):
+    def __init__(self, init, goal, block):
         self.init = init
-        self.cond = cond
-        self.step = step
+        self.goal = goal
         self.block = block
 
 
@@ -125,7 +132,7 @@ class Continue(Node):
     pass
 
 
-class Return(Node):
+class Exit(Node):
     def __init__(self, expr):
         self.expr = expr
 
@@ -136,6 +143,11 @@ class Type(Node):
 
 
 class Int(Node):
+    def __init__(self, value):
+        self.value = value
+
+
+class Real(Node):
     def __init__(self, value):
         self.value = value
 

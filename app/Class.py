@@ -56,6 +56,7 @@ class Class(Enum):
     REPEAT = auto()
     UNTIL = auto()
     OF = auto()
+    THEN = auto()
 
     BEGIN = auto()
     END = auto()

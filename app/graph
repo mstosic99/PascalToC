@@ -1,0 +1,113 @@
+digraph {
+	node [height=0.1 shape=box]
+	edge [arrowsize=0.5]
+	node1 [label=Program]
+	node2 [label=LocalVars]
+	node1 -> node2
+	node3 [label=StringDecl]
+	node2 -> node3
+	node4 [label="Type : string"]
+	node3 -> node4
+	node5 [label="Id : asd"]
+	node3 -> node5
+	node6 [label="Int : 50"]
+	node3 -> node6
+	node7 [label=StringDecl]
+	node2 -> node7
+	node8 [label="Type : string"]
+	node7 -> node8
+	node9 [label="Id : efg"]
+	node7 -> node9
+	node10 [label="Int : 50"]
+	node7 -> node10
+	node11 [label=Decl]
+	node2 -> node11
+	node12 [label="Type : integer"]
+	node11 -> node12
+	node13 [label="Id : len"]
+	node11 -> node13
+	node14 [label=Block]
+	node1 -> node14
+	node15 [label=Assign]
+	node14 -> node15
+	node16 [label="Id : asd"]
+	node15 -> node16
+	node17 [label="String : qwerty"]
+	node15 -> node17
+	node18 [label=FuncCall]
+	node14 -> node18
+	node19 [label="Id : write"]
+	node18 -> node19
+	node20 [label=Args]
+	node18 -> node20
+	node21 [label="String : Unesite string: "]
+	node20 -> node21
+	node22 [label=FuncCall]
+	node14 -> node22
+	node23 [label="Id : readln"]
+	node22 -> node23
+	node24 [label=Args]
+	node22 -> node24
+	node25 [label="Id : efg"]
+	node24 -> node25
+	node26 [label=FuncCall]
+	node14 -> node26
+	node27 [label="Id : writeln"]
+	node26 -> node27
+	node28 [label=Args]
+	node26 -> node28
+	node29 [label="String : Konkatenacija stringova: "]
+	node28 -> node29
+	node30 [label="Id : asd"]
+	node28 -> node30
+	node31 [label="String :  + "]
+	node28 -> node31
+	node32 [label="Id : efg"]
+	node28 -> node32
+	node33 [label=Assign]
+	node14 -> node33
+	node34 [label="Id : asd"]
+	node33 -> node34
+	node35 [label=FuncCall]
+	node33 -> node35
+	node36 [label="Id : concat"]
+	node35 -> node36
+	node37 [label=Args]
+	node35 -> node37
+	node38 [label="Id : asd"]
+	node37 -> node38
+	node39 [label="Id : efg"]
+	node37 -> node39
+	node40 [label=Assign]
+	node14 -> node40
+	node41 [label="Id : len"]
+	node40 -> node41
+	node42 [label=FuncCall]
+	node40 -> node42
+	node43 [label="Id : length"]
+	node42 -> node43
+	node44 [label=Args]
+	node42 -> node44
+	node45 [label="Id : asd"]
+	node44 -> node45
+	node46 [label=FuncCall]
+	node14 -> node46
+	node47 [label="Id : writeln"]
+	node46 -> node47
+	node48 [label=Args]
+	node46 -> node48
+	node49 [label="String : Rezultat konkatenacije: "]
+	node48 -> node49
+	node50 [label="Id : asd"]
+	node48 -> node50
+	node51 [label=FuncCall]
+	node14 -> node51
+	node52 [label="Id : writeln"]
+	node51 -> node52
+	node53 [label=Args]
+	node51 -> node53
+	node54 [label="String : Duzina konkatenacije: "]
+	node53 -> node54
+	node55 [label="Id : len"]
+	node53 -> node55
+}

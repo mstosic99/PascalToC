@@ -94,6 +94,8 @@ class Lexer:
             return Token(Class.OF, lexeme)
         elif lexeme == 'array':
             return Token(Class.ARRAY, lexeme)
+        elif lexeme == 'then':
+            return Token(Class.THEN, lexeme)
         return Token(Class.ID, lexeme)
 
     def advance_pos(self):
@@ -120,7 +122,7 @@ class Lexer:
                 token = Token(Class.CHAR, self.read_char())
             else:
                 self.pos -= 2
-                token = Token(Class.CHAR, self.read_string())
+                token = Token(Class.STRING, self.read_string())
         elif curr == '+':
             token = Token(Class.PLUS, curr)
         elif curr == '-':

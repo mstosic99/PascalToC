@@ -3,7 +3,8 @@ from functools import wraps
 
 from app.Class import Class
 from app.Node import Id, Program, FuncCall, ArrayElem, Assign, ArrayDecl, FuncImpl, Decl, If, While, For, Block, Params, \
-    Args, Elems, Return, Break, Continue, Type, Int, Char, String, UnOp, BinOp, ProcImpl, LocalVars
+    Args, Elems, Break, Continue, Type, Int, Char, String, UnOp, BinOp, ProcImpl, LocalVars, Exit, RepeatUntil, Real, \
+    StringDecl
 
 
 class Parser:
@@ -40,28 +41,55 @@ class Parser:
                 nodes.append(self.procedure())
             elif self.curr.class_ == Class.BEGIN:
                 nodes.append(self.block())
+                self.eat(Class.DOT)
             else:
                 self.die_deriv(self.program.__name__)
         return Program(nodes)
 
     def variables(self):
         self.eat(Class.VAR)
-        vars = []
+        variables = []
         while self.curr.class_ != Class.BEGIN:
             ids = []
             while self.curr.class_ != Class.COLON:
                 if len(ids) > 0:
                     self.eat(Class.COMMA)
-                ids.append(self.curr.lexeme)
+                ids.append(Id(self.curr.lexeme))
                 self.eat(Class.ID)
             self.eat(Class.COLON)
-            type_ = self.type_()
-            for id_ in ids:
-                vars.append(Decl(type_, id_))
+            if self.curr.class_ != Class.ARRAY:
+                type_ = self.type_()
+                if type_.value != 'string':
+                    for id_ in ids:
+                        variables.append(Decl(type_, id_))
+                else:
+                    self.eat(Class.LBRACKET)
+                    size = self.expr()
+                    self.eat(Class.RBRACKET)
+                    for id_ in ids:
+                        variables.append(StringDecl(type_, id_, size))
+
+            else:
+                self.eat(Class.ARRAY)
+                self.eat(Class.LBRACKET)
+                from_ = Int(self.curr.lexeme)
+                self.eat(Class.INT)
+                self.eat(Class.DDOT)
+                to_ = Int(self.curr.lexeme)
+                self.eat(Class.INT)
+                self.eat(Class.RBRACKET)
+                self.eat(Class.OF)
+                type_ = self.type_()
+                elems = None
+                if self.curr.class_ == Class.EQ:
+                    self.eat(Class.EQ)
+                    self.eat(Class.LPAREN)
+                    elems = self.elems()
+                    self.eat(Class.RPAREN)
+                variables.append(ArrayDecl(type_, ids[0], from_, to_, elems))
+
             self.eat(Class.SEMICOLON)
-        return LocalVars(vars)
-
-
+        return LocalVars(variables)
 
     def function(self):
         self.eat(Class.FUNCTION)
@@ -70,14 +98,16 @@ class Parser:
         self.eat(Class.LPAREN)
         params = self.params()
         self.eat(Class.RPAREN)
-        self.eat(Class.SEMICOLON)
         self.eat(Class.COLON)
         type_ = Type(self.curr.lexeme)
+        self.eat(Class.TYPE)
         self.eat(Class.SEMICOLON)
-        local_variables = self.variables()
+        local_variables = None
+        if self.curr.class_ == Class.VAR:
+            local_variables = self.variables()
         block = self.block()
         self.eat(Class.SEMICOLON)
-        return FuncImpl(type_, id_, params, block)
+        return FuncImpl(type_, id_, params, block, local_variables)
 
     def procedure(self):
         self.eat(Class.PROCEDURE)
@@ -87,12 +117,14 @@ class Parser:
         params = self.params()
         self.eat(Class.RPAREN)
         self.eat(Class.SEMICOLON)
-        block = self.block()  # TODO block()
+        local_variables = None
+        if self.curr.class_ == Class.VAR:
+            local_variables = self.variables()
+        block = self.block()
         self.eat(Class.SEMICOLON)
-        return ProcImpl(id_, params, block)
+        return ProcImpl(id_, params, block, local_variables)
 
     def id_(self):
-        is_array_elem = self.prev.class_ != Class.TYPE
         id_ = Id(self.curr.lexeme)
         self.eat(Class.ID)
         if self.curr.class_ == Class.LPAREN and self.is_func_call():
@@ -100,7 +132,7 @@ class Parser:
             args = self.args()
             self.eat(Class.RPAREN)
             return FuncCall(id_, args)
-        elif self.curr.class_ == Class.LBRACKET and is_array_elem:
+        elif self.curr.class_ == Class.LBRACKET:
             self.eat(Class.LBRACKET)
             index = self.expr()
             self.eat(Class.RBRACKET)
@@ -112,74 +144,46 @@ class Parser:
         else:
             return id_
 
-    def decl(self):
-        type_ = self.type_()
-        id_ = self.id_()
-        if self.curr.class_ == Class.LBRACKET:
-            self.eat(Class.LBRACKET)
-            size = None
-            if self.curr.class_ != Class.RBRACKET:
-                size = self.expr()
-            self.eat(Class.RBRACKET)
-            elems = None
-            if self.curr.class_ == Class.ASSIGN:
-                self.eat(Class.ASSIGN)
-                self.eat(Class.LBRACE)
-                elems = self.elems()
-                self.eat(Class.RBRACE)
-            self.eat(Class.SEMICOLON)
-            return ArrayDecl(type_, id_, size, elems)
-        elif self.curr.class_ == Class.LPAREN:
-            self.eat(Class.LPAREN)
-            params = self.params()
-            self.eat(Class.RPAREN)
-            self.eat(Class.LBRACE)
-            block = self.block()
-            self.eat(Class.RBRACE)
-            return FuncImpl(type_, id_, params, block)
-        else:
-            self.eat(Class.SEMICOLON)
-            return Decl(type_, id_)
-
     def if_(self):
         self.eat(Class.IF)
-        self.eat(Class.LPAREN)
         cond = self.logic()
-        self.eat(Class.RPAREN)
-        self.eat(Class.LBRACE)
+        self.eat(Class.THEN)
         true = self.block()
-        self.eat(Class.RBRACE)
         false = None
         if self.curr.class_ == Class.ELSE:
             self.eat(Class.ELSE)
-            self.eat(Class.LBRACE)
             false = self.block()
-            self.eat(Class.RBRACE)
+            self.eat(Class.SEMICOLON)
+        else:
+            self.eat(Class.SEMICOLON)
         return If(cond, true, false)
 
     def while_(self):
         self.eat(Class.WHILE)
-        self.eat(Class.LPAREN)
         cond = self.logic()
-        self.eat(Class.RPAREN)
-        self.eat(Class.LBRACE)
+        self.eat(Class.DO)
         block = self.block()
-        self.eat(Class.RBRACE)
+        self.eat(Class.SEMICOLON)
         return While(cond, block)
 
     def for_(self):
         self.eat(Class.FOR)
-        self.eat(Class.LPAREN)
         init = self.id_()
+        self.eat(Class.TO)
+        goal = self.expr()
+        self.eat(Class.DO)
+        block = self.block()
         self.eat(Class.SEMICOLON)
+        return For(init, goal, block)
+
+    def repeat_until(self):
+        self.eat(Class.REPEAT)
+        block = self.block()
+        self.eat(Class.SEMICOLON)
+        self.eat(Class.UNTIL)
         cond = self.logic()
         self.eat(Class.SEMICOLON)
-        step = self.id_()
-        self.eat(Class.RPAREN)
-        self.eat(Class.LBRACE)
-        block = self.block()
-        self.eat(Class.RBRACE)
-        return For(init, cond, step, block)
+        return RepeatUntil(cond, block)
 
     def block(self):
         nodes = []
@@ -189,21 +193,22 @@ class Parser:
                 nodes.append(self.if_())
             elif self.curr.class_ == Class.WHILE:
                 nodes.append(self.while_())
+            elif self.curr.class_ == Class.REPEAT:
+                nodes.append(self.repeat_until())
             elif self.curr.class_ == Class.FOR:
                 nodes.append(self.for_())
             elif self.curr.class_ == Class.BREAK:
                 nodes.append(self.break_())
             elif self.curr.class_ == Class.CONTINUE:
                 nodes.append(self.continue_())
-            elif self.curr.class_ == Class.RETURN:
-                nodes.append(self.return_())
-            elif self.curr.class_ == Class.TYPE:
-                nodes.append(self.decl())
+            elif self.curr.class_ == Class.EXIT:
+                nodes.append(self.exit_())
             elif self.curr.class_ == Class.ID:
                 nodes.append(self.id_())
                 self.eat(Class.SEMICOLON)
             else:
                 self.die_deriv(self.block.__name__)
+        self.eat(Class.END)
         return Block(nodes)
 
     def params(self):
@@ -215,7 +220,7 @@ class Parser:
             while self.curr.class_ != Class.COLON:
                 if len(ids) > 0:
                     self.eat(Class.COMMA)
-                ids.append(self.curr.lexeme)
+                ids.append(Id(self.curr.lexeme))
                 self.eat(Class.ID)
             self.eat(Class.COLON)
             type_ = self.type_()
@@ -233,17 +238,17 @@ class Parser:
 
     def elems(self):
         elems = []
-        while self.curr.class_ != Class.RBRACE:
+        while self.curr.class_ != Class.RPAREN:
             if len(elems) > 0:
                 self.eat(Class.COMMA)
             elems.append(self.expr())
         return Elems(elems)
 
-    def return_(self):
-        self.eat(Class.RETURN)
+    def exit_(self):
+        self.eat(Class.EXIT)
         expr = self.expr()
         self.eat(Class.SEMICOLON)
-        return Return(expr)
+        return Exit(expr)
 
     def break_(self):
         self.eat(Class.BREAK)
@@ -265,6 +270,9 @@ class Parser:
             value = Int(self.curr.lexeme)
             self.eat(Class.INT)
             return value
+        elif self.curr.class_ == Class.REAL:
+            value = Real(self.curr.lexeme)
+            self.eat(Class.REAL)
         elif self.curr.class_ == Class.CHAR:
             value = Char(self.curr.lexeme)
             self.eat(Class.CHAR)
@@ -298,20 +306,20 @@ class Parser:
 
     def term(self):
         first = self.factor()
-        while self.curr.class_ in [Class.STAR, Class.FWDSLASH, Class.PERCENT]:
+        while self.curr.class_ in [Class.STAR, Class.DIV, Class.MOD]:
             if self.curr.class_ == Class.STAR:
                 op = self.curr.lexeme
                 self.eat(Class.STAR)
                 second = self.factor()
                 first = BinOp(op, first, second)
-            elif self.curr.class_ == Class.FWDSLASH:
+            elif self.curr.class_ == Class.DIV:
                 op = self.curr.lexeme
-                self.eat(Class.FWDSLASH)
+                self.eat(Class.DIV)
                 second = self.factor()
                 first = BinOp(op, first, second)
-            elif self.curr.class_ == Class.PERCENT:
+            elif self.curr.class_ == Class.MOD:
                 op = self.curr.lexeme
-                self.eat(Class.PERCENT)
+                self.eat(Class.MOD)
                 second = self.factor()
                 first = BinOp(op, first, second)
         return first
@@ -390,7 +398,6 @@ class Parser:
             self.eat(Class.LPAREN)
             self.args()
             self.eat(Class.RPAREN)
-            self.eat(Class.SEMICOLON)
             return self.curr.class_ != Class.BEGIN
         except:
             return False
