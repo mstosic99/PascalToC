@@ -182,7 +182,6 @@ class Parser:
         self.eat(Class.SEMICOLON)
         self.eat(Class.UNTIL)
         cond = self.logic()
-        self.eat(Class.SEMICOLON)
         return RepeatUntil(cond, block)
 
     def block(self):
@@ -273,6 +272,7 @@ class Parser:
         elif self.curr.class_ == Class.REAL:
             value = Real(self.curr.lexeme)
             self.eat(Class.REAL)
+            return value
         elif self.curr.class_ == Class.CHAR:
             value = Char(self.curr.lexeme)
             self.eat(Class.CHAR)
