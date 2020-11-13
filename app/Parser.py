@@ -4,7 +4,7 @@ from functools import wraps
 from app.Class import Class
 from app.Node import Id, Program, FuncCall, ArrayElem, Assign, ArrayDecl, FuncImpl, Decl, If, While, For, Block, Params, \
     Args, Elems, Break, Continue, Type, Int, Char, String, UnOp, BinOp, ProcImpl, LocalVars, Exit, RepeatUntil, Real, \
-    StringDecl
+    StringDecl, ProcCall
 
 
 class Parser:
@@ -125,13 +125,17 @@ class Parser:
         return ProcImpl(id_, params, block, local_variables)
 
     def id_(self):
+        is_proc_call = self.prev.class_ == Class.SEMICOLON or self.prev.class_ == Class.BEGIN
         id_ = Id(self.curr.lexeme)
         self.eat(Class.ID)
         if self.curr.class_ == Class.LPAREN and self.is_func_call():
             self.eat(Class.LPAREN)
             args = self.args()
             self.eat(Class.RPAREN)
-            return FuncCall(id_, args)
+            if is_proc_call:
+                return ProcCall(id_, args)
+            else:
+                return FuncCall(id_, args)
         elif self.curr.class_ == Class.LBRACKET:
             self.eat(Class.LBRACKET)
             index = self.expr()
@@ -169,7 +173,10 @@ class Parser:
     def for_(self):
         self.eat(Class.FOR)
         init = self.id_()
-        self.eat(Class.TO)
+        if self.curr.lexeme == 'to':
+            self.eat(Class.TO)
+        elif self.curr.lexeme == 'downto':
+            self.eat(Class.DOWNTO)
         goal = self.expr()
         self.eat(Class.DO)
         block = self.block()

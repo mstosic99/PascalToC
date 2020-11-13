@@ -60,6 +60,8 @@ class Lexer:
             return Token(Class.DO, lexeme)
         elif lexeme == 'to':
             return Token(Class.TO, lexeme)
+        elif lexeme == 'downto':
+            return Token(Class.DOWNTO, lexeme)
         elif lexeme == 'break':
             return Token(Class.BREAK, lexeme)
         elif lexeme == 'continue':
@@ -96,6 +98,14 @@ class Lexer:
             return Token(Class.ARRAY, lexeme)
         elif lexeme == 'then':
             return Token(Class.THEN, lexeme)
+        elif lexeme == 'and':
+            return Token(Class.AND, lexeme)
+        elif lexeme == 'or':
+            return Token(Class.OR, lexeme)
+        elif lexeme == 'xor':
+            return Token(Class.XOR, lexeme)
+        elif lexeme == 'not':
+            return Token(Class.NOT, lexeme)
         return Token(Class.ID, lexeme)
 
     def advance_pos(self):
@@ -138,26 +148,6 @@ class Lexer:
             else:
                 self.pos -= 1
                 token = Token(Class.DOT, '.')
-        elif curr == '&':
-            curr = self.advance_pos()
-            if curr == '&':
-                token = Token(Class.AND, '&&')
-            else:
-                token = Token(Class.ADDRESS, '&')
-                self.pos -= 1
-        elif curr == '|':
-            curr = self.advance_pos()
-            if curr == '|':
-                token = Token(Class.OR, '||')
-            else:
-                self.die(curr)
-        elif curr == '!':
-            curr = self.advance_pos()
-            if curr == '=':
-                token = Token(Class.NEQ, '!=')
-            else:
-                token = Token(Class.NOT, '!')
-                self.pos -= 1
         elif curr == '=':
             curr = self.advance_pos()
             if curr == ' ':
@@ -175,6 +165,8 @@ class Lexer:
             curr = self.advance_pos()
             if curr == '=':
                 token = Token(Class.LTE, '<=')
+            elif curr == '>':
+                token = Token(Class.NEQ)
             else:
                 token = Token(Class.LT, '<')
                 self.pos -= 1

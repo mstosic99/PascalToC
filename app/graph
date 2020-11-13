@@ -2,112 +2,242 @@ digraph {
 	node [height=0.1 shape=box]
 	edge [arrowsize=0.5]
 	node1 [label=Program]
-	node2 [label=LocalVars]
+	node2 [label=ProcImpl]
 	node1 -> node2
-	node3 [label=StringDecl]
+	node3 [label="Id : fun"]
 	node2 -> node3
-	node4 [label="Type : string"]
-	node3 -> node4
-	node5 [label="Id : asd"]
-	node3 -> node5
-	node6 [label="Int : 50"]
-	node3 -> node6
-	node7 [label=StringDecl]
-	node2 -> node7
-	node8 [label="Type : string"]
-	node7 -> node8
-	node9 [label="Id : efg"]
-	node7 -> node9
-	node10 [label="Int : 50"]
-	node7 -> node10
-	node11 [label=Decl]
+	node4 [label=Params]
+	node2 -> node4
+	node5 [label=Decl]
+	node4 -> node5
+	node6 [label="Type : integer"]
+	node5 -> node6
+	node7 [label="Id : a"]
+	node5 -> node7
+	node8 [label=Decl]
+	node4 -> node8
+	node9 [label="Type : integer"]
+	node8 -> node9
+	node10 [label="Id : b"]
+	node8 -> node10
+	node11 [label=Block]
 	node2 -> node11
-	node12 [label="Type : integer"]
+	node12 [label=ProcCall]
 	node11 -> node12
-	node13 [label="Id : len"]
-	node11 -> node13
-	node14 [label=Block]
-	node1 -> node14
-	node15 [label=Assign]
+	node13 [label="Id : writeln"]
+	node12 -> node13
+	node14 [label=Args]
+	node12 -> node14
+	node15 [label="Id : a"]
 	node14 -> node15
-	node16 [label="Id : asd"]
-	node15 -> node16
-	node17 [label="String : qwerty"]
-	node15 -> node17
-	node18 [label=FuncCall]
-	node14 -> node18
-	node19 [label="Id : write"]
+	node16 [label="Char :  "]
+	node14 -> node16
+	node17 [label="Id : b"]
+	node14 -> node17
+	node18 [label=FuncImpl]
+	node1 -> node18
+	node19 [label="Type : integer"]
 	node18 -> node19
-	node20 [label=Args]
+	node20 [label="Id : fun2"]
 	node18 -> node20
-	node21 [label="String : Unesite string: "]
-	node20 -> node21
-	node22 [label=FuncCall]
-	node14 -> node22
-	node23 [label="Id : readln"]
+	node21 [label=Params]
+	node18 -> node21
+	node22 [label=Decl]
+	node21 -> node22
+	node23 [label="Type : integer"]
 	node22 -> node23
-	node24 [label=Args]
+	node24 [label="Id : a"]
 	node22 -> node24
-	node25 [label="Id : efg"]
-	node24 -> node25
-	node26 [label=FuncCall]
-	node14 -> node26
-	node27 [label="Id : writeln"]
-	node26 -> node27
-	node28 [label=Args]
-	node26 -> node28
-	node29 [label="String : Konkatenacija stringova: "]
+	node25 [label=Decl]
+	node21 -> node25
+	node26 [label="Type : integer"]
+	node25 -> node26
+	node27 [label="Id : b"]
+	node25 -> node27
+	node28 [label=Block]
+	node18 -> node28
+	node29 [label=Assign]
 	node28 -> node29
-	node30 [label="Id : asd"]
-	node28 -> node30
-	node31 [label="String :  + "]
-	node28 -> node31
-	node32 [label="Id : efg"]
-	node28 -> node32
-	node33 [label=Assign]
-	node14 -> node33
-	node34 [label="Id : asd"]
-	node33 -> node34
-	node35 [label=FuncCall]
-	node33 -> node35
-	node36 [label="Id : concat"]
-	node35 -> node36
-	node37 [label=Args]
-	node35 -> node37
-	node38 [label="Id : asd"]
+	node30 [label="Id : fun2"]
+	node29 -> node30
+	node31 [label="BinOp : +"]
+	node29 -> node31
+	node32 [label="Id : a"]
+	node31 -> node32
+	node33 [label="Id : b"]
+	node31 -> node33
+	node34 [label=FuncImpl]
+	node1 -> node34
+	node35 [label="Type : integer"]
+	node34 -> node35
+	node36 [label="Id : fun3"]
+	node34 -> node36
+	node37 [label=Params]
+	node34 -> node37
+	node38 [label=Decl]
 	node37 -> node38
-	node39 [label="Id : efg"]
-	node37 -> node39
-	node40 [label=Assign]
-	node14 -> node40
-	node41 [label="Id : len"]
-	node40 -> node41
-	node42 [label=FuncCall]
-	node40 -> node42
-	node43 [label="Id : length"]
-	node42 -> node43
-	node44 [label=Args]
-	node42 -> node44
-	node45 [label="Id : asd"]
+	node39 [label="Type : integer"]
+	node38 -> node39
+	node40 [label="Id : p"]
+	node38 -> node40
+	node41 [label=Decl]
+	node37 -> node41
+	node42 [label="Type : integer"]
+	node41 -> node42
+	node43 [label="Id : q"]
+	node41 -> node43
+	node44 [label=Decl]
+	node37 -> node44
+	node45 [label="Type : integer"]
 	node44 -> node45
-	node46 [label=FuncCall]
-	node14 -> node46
-	node47 [label="Id : writeln"]
-	node46 -> node47
-	node48 [label=Args]
-	node46 -> node48
-	node49 [label="String : Rezultat konkatenacije: "]
+	node46 [label="Id : r"]
+	node44 -> node46
+	node47 [label=Block]
+	node34 -> node47
+	node48 [label=Assign]
+	node47 -> node48
+	node49 [label="Id : fun3"]
 	node48 -> node49
-	node50 [label="Id : asd"]
+	node50 [label="BinOp : +"]
 	node48 -> node50
-	node51 [label=FuncCall]
-	node14 -> node51
-	node52 [label="Id : writeln"]
-	node51 -> node52
-	node53 [label=Args]
-	node51 -> node53
-	node54 [label="String : Duzina konkatenacije: "]
+	node51 [label="Id : q"]
+	node50 -> node51
+	node52 [label="Id : r"]
+	node50 -> node52
+	node53 [label=LocalVars]
+	node1 -> node53
+	node54 [label=Decl]
 	node53 -> node54
-	node55 [label="Id : len"]
-	node53 -> node55
+	node55 [label="Type : integer"]
+	node54 -> node55
+	node56 [label="Id : x"]
+	node54 -> node56
+	node57 [label=Decl]
+	node53 -> node57
+	node58 [label="Type : integer"]
+	node57 -> node58
+	node59 [label="Id : y"]
+	node57 -> node59
+	node60 [label=Decl]
+	node53 -> node60
+	node61 [label="Type : integer"]
+	node60 -> node61
+	node62 [label="Id : i"]
+	node60 -> node62
+	node63 [label=ArrayDecl]
+	node53 -> node63
+	node64 [label="Type : integer"]
+	node63 -> node64
+	node65 [label="Id : arr1"]
+	node63 -> node65
+	node66 [label="Int : 1"]
+	node63 -> node66
+	node67 [label="Int : 3"]
+	node63 -> node67
+	node68 [label=ArrayDecl]
+	node53 -> node68
+	node69 [label="Type : integer"]
+	node68 -> node69
+	node70 [label="Id : arr2"]
+	node68 -> node70
+	node71 [label="Int : 1"]
+	node68 -> node71
+	node72 [label="Int : 3"]
+	node68 -> node72
+	node73 [label=Elems]
+	node68 -> node73
+	node74 [label="Int : 1"]
+	node73 -> node74
+	node75 [label="Int : 23"]
+	node73 -> node75
+	node76 [label="Int : 456"]
+	node73 -> node76
+	node77 [label=ArrayDecl]
+	node53 -> node77
+	node78 [label="Type : integer"]
+	node77 -> node78
+	node79 [label="Id : arr3"]
+	node77 -> node79
+	node80 [label="Int : 1"]
+	node77 -> node80
+	node81 [label="Int : 3"]
+	node77 -> node81
+	node82 [label=Block]
+	node1 -> node82
+	node83 [label=Assign]
+	node82 -> node83
+	node84 [label="Id : y"]
+	node83 -> node84
+	node85 [label="Int : 5"]
+	node83 -> node85
+	node86 [label=For]
+	node82 -> node86
+	node87 [label=Assign]
+	node86 -> node87
+	node88 [label="Id : i"]
+	node87 -> node88
+	node89 [label="Int : 1"]
+	node87 -> node89
+	node90 [label="Int : 3"]
+	node86 -> node90
+	node91 [label=Block]
+	node86 -> node91
+	node92 [label=Assign]
+	node91 -> node92
+	node93 [label=ArrayElem]
+	node92 -> node93
+	node94 [label="Id : arr1"]
+	node93 -> node94
+	node95 [label="Id : i"]
+	node93 -> node95
+	node96 [label=ArrayElem]
+	node92 -> node96
+	node97 [label="Id : arr2"]
+	node96 -> node97
+	node98 [label="Id : i"]
+	node96 -> node98
+	node99 [label=Assign]
+	node91 -> node99
+	node100 [label=ArrayElem]
+	node99 -> node100
+	node101 [label="Id : arr1"]
+	node100 -> node101
+	node102 [label="Id : i"]
+	node100 -> node102
+	node103 [label=FuncCall]
+	node99 -> node103
+	node104 [label="Id : fun2"]
+	node103 -> node104
+	node105 [label=Args]
+	node103 -> node105
+	node106 [label=ArrayElem]
+	node105 -> node106
+	node107 [label="Id : arr1"]
+	node106 -> node107
+	node108 [label="Id : i"]
+	node106 -> node108
+	node109 [label=ArrayElem]
+	node105 -> node109
+	node110 [label="Id : arr2"]
+	node109 -> node110
+	node111 [label="Id : i"]
+	node109 -> node111
+	node112 [label=ProcCall]
+	node91 -> node112
+	node113 [label="Id : fun"]
+	node112 -> node113
+	node114 [label=Args]
+	node112 -> node114
+	node115 [label=ArrayElem]
+	node114 -> node115
+	node116 [label="Id : arr1"]
+	node115 -> node116
+	node117 [label="Id : i"]
+	node115 -> node117
+	node118 [label=ArrayElem]
+	node114 -> node118
+	node119 [label="Id : arr2"]
+	node118 -> node119
+	node120 [label="Id : i"]
+	node118 -> node120
 }

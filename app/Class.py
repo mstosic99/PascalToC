@@ -13,6 +13,7 @@ class Class(Enum):
     OR = auto()
     AND = auto()
     NOT = auto()
+    XOR = auto()
 
     EQ = auto()
     NEQ = auto()
@@ -53,6 +54,7 @@ class Class(Enum):
     FOR = auto()
     DO = auto()
     TO = auto()
+    DOWNTO = auto()
     REPEAT = auto()
     UNTIL = auto()
     OF = auto()

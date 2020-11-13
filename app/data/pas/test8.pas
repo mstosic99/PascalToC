@@ -21,6 +21,10 @@ begin
 				temp := niz[i];
 				niz[i] := niz[j];
 				niz[j] := temp;
+			end
+			else
+			begin
+				writeln(i);
 			end;
 		end;
 	end;
@@ -37,7 +41,7 @@ begin
 		end
 		else
 		begin
-			write(' ')
+			write(' ');
 		end;
 	end;
 end.

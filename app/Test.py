@@ -9,7 +9,7 @@ from app.Grapher import Grapher
 from app.Lexer import Lexer
 from app.Parser import Parser
 
-test_id = 10
+test_id = 3
 path = f'{getcwd()}/data/pas/test{test_id}.pas'
 
 with open(path, 'r') as source:
