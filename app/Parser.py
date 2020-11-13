@@ -179,9 +179,9 @@ class Parser:
     def repeat_until(self):
         self.eat(Class.REPEAT)
         block = self.block()
-        self.eat(Class.SEMICOLON)
         self.eat(Class.UNTIL)
         cond = self.logic()
+        self.eat(Class.SEMICOLON)
         return RepeatUntil(cond, block)
 
     def block(self):
