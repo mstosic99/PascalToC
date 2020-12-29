@@ -45,10 +45,22 @@ class Assign(Node):
 
 
 class If(Node):
-    def __init__(self, cond, true, false):
+    def __init__(self, cond, true, elseifs, false):
         self.cond = cond
         self.true = true
+        self.elseifs = elseifs
         self.false = false
+
+
+class ElseIf(Node):
+    def __init__(self, cond, true):
+        self.cond = cond
+        self.true = true
+
+
+class Else(Node):
+    def __init__(self, block):
+        self.block = block
 
 
 class While(Node):
@@ -119,6 +131,13 @@ class Args(Node):
         self.args = args
 
 
+class WriteArg(Node):
+    def __init__(self, expr, total_characters, places_after_dot):
+        self.expr = expr
+        self.total_characters = total_characters
+        self.places_after_dot = places_after_dot
+
+
 class Elems(Node):
     def __init__(self, elems):
         self.elems = elems
@@ -163,6 +182,11 @@ class String(Node):
 
 
 class Id(Node):
+    def __init__(self, value):
+        self.value = value
+
+
+class Bool(Node):
     def __init__(self, value):
         self.value = value
 

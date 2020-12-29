@@ -68,8 +68,19 @@ class Grapher(Visitor):
         self.add_node(parent, node)
         self.visit(node, node.cond)
         self.visit(node, node.true)
+        for elseif_node in node.elseifs:
+            self.visit(node, elseif_node)
         if node.false is not None:
             self.visit(node, node.false)
+
+    def visit_ElseIf(self, parent, node):
+        self.add_node(parent, node)
+        self.visit(node, node.cond)
+        self.visit(node, node.true)
+
+    def visit_Else(self, parent, node):
+        self.add_node(parent, node)
+        self.visit(node, node.block)
 
     def visit_While(self, parent, node):
         self.add_node(parent, node)
@@ -134,6 +145,14 @@ class Grapher(Visitor):
         for a in node.args:
             self.visit(node, a)
 
+    def visit_WriteArg(self, parent, node):
+        self.add_node(parent, node)
+        self.visit(node, node.expr)
+        if node.total_characters is not None:
+            self.visit(node, node.total_characters)
+        if node.places_after_dot is not None:
+            self.visit(node, node.places_after_dot)
+
     def visit_Elems(self, parent, node):
         self.add_node(parent, node)
         for e in node.elems:
@@ -169,6 +188,11 @@ class Grapher(Visitor):
     def visit_String(self, parent, node):
         name = node.value
         self.add_node(parent, node, name)
+
+    def visit_Bool(self, parent, node):
+        name = node.value
+        self.add_node(parent, node, name)
+
 
     def visit_Id(self, parent, node):
         name = node.value

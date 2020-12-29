@@ -124,120 +124,132 @@ digraph {
 	node60 -> node61
 	node62 [label="Id : i"]
 	node60 -> node62
-	node63 [label=ArrayDecl]
+	node63 [label=Decl]
 	node53 -> node63
-	node64 [label="Type : integer"]
+	node64 [label="Type : real"]
 	node63 -> node64
-	node65 [label="Id : arr1"]
+	node65 [label="Id : a"]
 	node63 -> node65
-	node66 [label="Int : 1"]
-	node63 -> node66
-	node67 [label="Int : 3"]
-	node63 -> node67
-	node68 [label=ArrayDecl]
-	node53 -> node68
-	node69 [label="Type : integer"]
-	node68 -> node69
-	node70 [label="Id : arr2"]
-	node68 -> node70
-	node71 [label="Int : 1"]
-	node68 -> node71
-	node72 [label="Int : 3"]
-	node68 -> node72
-	node73 [label=Elems]
-	node68 -> node73
+	node66 [label=ArrayDecl]
+	node53 -> node66
+	node67 [label="Type : integer"]
+	node66 -> node67
+	node68 [label="Id : arr1"]
+	node66 -> node68
+	node69 [label="Int : 1"]
+	node66 -> node69
+	node70 [label="Int : 3"]
+	node66 -> node70
+	node71 [label=ArrayDecl]
+	node53 -> node71
+	node72 [label="Type : integer"]
+	node71 -> node72
+	node73 [label="Id : arr2"]
+	node71 -> node73
 	node74 [label="Int : 1"]
-	node73 -> node74
-	node75 [label="Int : 23"]
-	node73 -> node75
-	node76 [label="Int : 456"]
-	node73 -> node76
-	node77 [label=ArrayDecl]
-	node53 -> node77
-	node78 [label="Type : integer"]
-	node77 -> node78
-	node79 [label="Id : arr3"]
-	node77 -> node79
-	node80 [label="Int : 1"]
-	node77 -> node80
-	node81 [label="Int : 3"]
-	node77 -> node81
-	node82 [label=Block]
-	node1 -> node82
-	node83 [label=Assign]
-	node82 -> node83
-	node84 [label="Id : y"]
-	node83 -> node84
-	node85 [label="Int : 5"]
-	node83 -> node85
-	node86 [label=For]
-	node82 -> node86
-	node87 [label=Assign]
+	node71 -> node74
+	node75 [label="Int : 3"]
+	node71 -> node75
+	node76 [label=Elems]
+	node71 -> node76
+	node77 [label="Int : 1"]
+	node76 -> node77
+	node78 [label="Int : 23"]
+	node76 -> node78
+	node79 [label="Int : 456"]
+	node76 -> node79
+	node80 [label=ArrayDecl]
+	node53 -> node80
+	node81 [label="Type : integer"]
+	node80 -> node81
+	node82 [label="Id : arr3"]
+	node80 -> node82
+	node83 [label="Int : 1"]
+	node80 -> node83
+	node84 [label="Int : 3"]
+	node80 -> node84
+	node85 [label=Block]
+	node1 -> node85
+	node86 [label=Assign]
+	node85 -> node86
+	node87 [label="Id : y"]
 	node86 -> node87
-	node88 [label="Id : i"]
-	node87 -> node88
-	node89 [label="Int : 1"]
-	node87 -> node89
-	node90 [label="Int : 3"]
-	node86 -> node90
-	node91 [label=Block]
-	node86 -> node91
-	node92 [label=Assign]
-	node91 -> node92
-	node93 [label=ArrayElem]
+	node88 [label="Int : 5"]
+	node86 -> node88
+	node89 [label=Assign]
+	node85 -> node89
+	node90 [label="Id : a"]
+	node89 -> node90
+	node91 [label="Real : 2.63435"]
+	node89 -> node91
+	node92 [label=For]
+	node85 -> node92
+	node93 [label=Assign]
 	node92 -> node93
-	node94 [label="Id : arr1"]
+	node94 [label="Id : i"]
 	node93 -> node94
-	node95 [label="Id : i"]
+	node95 [label="Int : 1"]
 	node93 -> node95
-	node96 [label=ArrayElem]
+	node96 [label="Int : 3"]
 	node92 -> node96
-	node97 [label="Id : arr2"]
-	node96 -> node97
-	node98 [label="Id : i"]
-	node96 -> node98
-	node99 [label=Assign]
-	node91 -> node99
-	node100 [label=ArrayElem]
+	node97 [label=Block]
+	node92 -> node97
+	node98 [label=Assign]
+	node97 -> node98
+	node99 [label=ArrayElem]
+	node98 -> node99
+	node100 [label="Id : arr1"]
 	node99 -> node100
-	node101 [label="Id : arr1"]
-	node100 -> node101
-	node102 [label="Id : i"]
-	node100 -> node102
-	node103 [label=FuncCall]
-	node99 -> node103
-	node104 [label="Id : fun2"]
-	node103 -> node104
-	node105 [label=Args]
-	node103 -> node105
+	node101 [label="Id : i"]
+	node99 -> node101
+	node102 [label=ArrayElem]
+	node98 -> node102
+	node103 [label="Id : arr2"]
+	node102 -> node103
+	node104 [label="Id : i"]
+	node102 -> node104
+	node105 [label=Assign]
+	node97 -> node105
 	node106 [label=ArrayElem]
 	node105 -> node106
 	node107 [label="Id : arr1"]
 	node106 -> node107
 	node108 [label="Id : i"]
 	node106 -> node108
-	node109 [label=ArrayElem]
+	node109 [label=FuncCall]
 	node105 -> node109
-	node110 [label="Id : arr2"]
+	node110 [label="Id : fun2"]
 	node109 -> node110
-	node111 [label="Id : i"]
+	node111 [label=Args]
 	node109 -> node111
-	node112 [label=ProcCall]
-	node91 -> node112
-	node113 [label="Id : fun"]
+	node112 [label=ArrayElem]
+	node111 -> node112
+	node113 [label="Id : arr1"]
 	node112 -> node113
-	node114 [label=Args]
+	node114 [label="Id : i"]
 	node112 -> node114
 	node115 [label=ArrayElem]
-	node114 -> node115
-	node116 [label="Id : arr1"]
+	node111 -> node115
+	node116 [label="Id : arr2"]
 	node115 -> node116
 	node117 [label="Id : i"]
 	node115 -> node117
-	node118 [label=ArrayElem]
-	node114 -> node118
-	node119 [label="Id : arr2"]
+	node118 [label=ProcCall]
+	node97 -> node118
+	node119 [label="Id : fun"]
 	node118 -> node119
-	node120 [label="Id : i"]
+	node120 [label=Args]
 	node118 -> node120
+	node121 [label=ArrayElem]
+	node120 -> node121
+	node122 [label="Id : arr1"]
+	node121 -> node122
+	node123 [label="Id : i"]
+	node121 -> node123
+	node124 [label=ArrayElem]
+	node120 -> node124
+	node125 [label="Id : arr2"]
+	node124 -> node125
+	node126 [label="Id : i"]
+	node124 -> node126
 }

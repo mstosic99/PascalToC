@@ -46,12 +46,16 @@ class Lexer:
 
     def read_keyword(self):
         lexeme = self.text[self.pos]
-        while self.pos + 1 < self.len and self.text[self.pos + 1].isalnum():
+        while self.pos + 1 < self.len and self.text[self.pos + 1].isalnum() or self.text[self.pos + 1] == '_':
             lexeme += self.advance_pos()
         if lexeme == 'if':
             return Token(Class.IF, lexeme)
         elif lexeme == 'else':
-            return Token(Class.ELSE, lexeme)
+            if self.text[self.pos + 2] == 'i' and self.text[self.pos + 3] == 'f':
+                lexeme += self.advance_pos() + self.advance_pos() + self.advance_pos()
+                return Token(Class.ELSEIF, lexeme)
+            else:
+                return Token(Class.ELSE, lexeme)
         elif lexeme == 'while':
             return Token(Class.WHILE, lexeme)
         elif lexeme == 'for':
@@ -120,7 +124,7 @@ class Lexer:
         if curr is None:
             return Token(Class.EOF, curr)
         token = None
-        if curr.isalpha():
+        if curr.isalpha() or curr == '_':
             token = self.read_keyword()
         elif curr.isdigit():
             token = self.read_num()
@@ -166,7 +170,7 @@ class Lexer:
             if curr == '=':
                 token = Token(Class.LTE, '<=')
             elif curr == '>':
-                token = Token(Class.NEQ)
+                token = Token(Class.NEQ, '<>')
             else:
                 token = Token(Class.LT, '<')
                 self.pos -= 1

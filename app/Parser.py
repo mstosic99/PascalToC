@@ -4,10 +4,12 @@ from functools import wraps
 from app.Class import Class
 from app.Node import Id, Program, FuncCall, ArrayElem, Assign, ArrayDecl, FuncImpl, Decl, If, While, For, Block, Params, \
     Args, Elems, Break, Continue, Type, Int, Char, String, UnOp, BinOp, ProcImpl, LocalVars, Exit, RepeatUntil, Real, \
-    StringDecl, ProcCall
+    StringDecl, ProcCall, Bool, ElseIf, Else, WriteArg
 
 
 class Parser:
+    is_write = False
+
     def __init__(self, tokens):
         self.tokens = tokens
         self.curr = tokens.pop(0)
@@ -63,9 +65,11 @@ class Parser:
                     for id_ in ids:
                         variables.append(Decl(type_, id_))
                 else:
-                    self.eat(Class.LBRACKET)
-                    size = self.expr()
-                    self.eat(Class.RBRACKET)
+                    size = Int(255)
+                    if self.curr.class_ == Class.LBRACKET:
+                        self.eat(Class.LBRACKET)
+                        size = self.expr()
+                        self.eat(Class.RBRACKET)
                     for id_ in ids:
                         variables.append(StringDecl(type_, id_, size))
 
@@ -128,10 +132,14 @@ class Parser:
         is_proc_call = self.prev.class_ == Class.SEMICOLON or self.prev.class_ == Class.BEGIN
         id_ = Id(self.curr.lexeme)
         self.eat(Class.ID)
+        is_proc_call = is_proc_call and self.curr.class_ == Class.LPAREN
         if self.curr.class_ == Class.LPAREN and self.is_func_call():
+            if self.prev.lexeme == 'write' or self.prev.lexeme == 'writeln':
+                self.is_write = True
             self.eat(Class.LPAREN)
             args = self.args()
             self.eat(Class.RPAREN)
+            self.is_write = False
             if is_proc_call:
                 return ProcCall(id_, args)
             else:
@@ -143,8 +151,8 @@ class Parser:
             id_ = ArrayElem(id_, index)
         if self.curr.class_ == Class.ASSIGN:
             self.eat(Class.ASSIGN)
-            expr = self.expr()
-            return Assign(id_, expr)
+            logic = self.logic()
+            return Assign(id_, logic)
         else:
             return id_
 
@@ -154,13 +162,21 @@ class Parser:
         self.eat(Class.THEN)
         true = self.block()
         false = None
-        if self.curr.class_ == Class.ELSE:
-            self.eat(Class.ELSE)
-            false = self.block()
-            self.eat(Class.SEMICOLON)
-        else:
-            self.eat(Class.SEMICOLON)
-        return If(cond, true, false)
+        elseifs = []
+        while self.curr.class_ == Class.ELSE or self.curr.class_ == Class.ELSEIF:
+            if self.curr.class_ == Class.ELSEIF:
+                elseif = ElseIf(None, None)
+                self.eat(Class.ELSEIF)
+                elseif.cond = self.logic()
+                self.eat(Class.THEN)
+                elseif.true = self.block()
+                elseifs.append(elseif)
+            elif self.curr.class_ == Class.ELSE:
+                self.eat(Class.ELSE)
+                false = Else(self.block())
+
+        self.eat(Class.SEMICOLON)
+        return If(cond, true, elseifs, false)
 
     def while_(self):
         self.eat(Class.WHILE)
@@ -185,7 +201,7 @@ class Parser:
 
     def repeat_until(self):
         self.eat(Class.REPEAT)
-        block = self.block()
+        block = self.block_repeat_until()
         self.eat(Class.UNTIL)
         cond = self.logic()
         self.eat(Class.SEMICOLON)
@@ -217,6 +233,30 @@ class Parser:
         self.eat(Class.END)
         return Block(nodes)
 
+    def block_repeat_until(self):
+        nodes = []
+        while self.curr.class_ != Class.UNTIL:
+            if self.curr.class_ == Class.IF:
+                nodes.append(self.if_())
+            elif self.curr.class_ == Class.WHILE:
+                nodes.append(self.while_())
+            elif self.curr.class_ == Class.REPEAT:
+                nodes.append(self.repeat_until())
+            elif self.curr.class_ == Class.FOR:
+                nodes.append(self.for_())
+            elif self.curr.class_ == Class.BREAK:
+                nodes.append(self.break_())
+            elif self.curr.class_ == Class.CONTINUE:
+                nodes.append(self.continue_())
+            elif self.curr.class_ == Class.EXIT:
+                nodes.append(self.exit_())
+            elif self.curr.class_ == Class.ID:
+                nodes.append(self.id_())
+                self.eat(Class.SEMICOLON)
+            else:
+                self.die_deriv(self.block.__name__)
+        return Block(nodes)
+
     def params(self):
         params = []
         while self.curr.class_ != Class.RPAREN:
@@ -234,11 +274,31 @@ class Parser:
                 params.append(Decl(type_, id_))
         return Params(params)
 
+    def handle_write(self, args):
+        total_characters = Int(10)
+        places_after_dot = Int(10)
+        self.eat(Class.LPAREN)
+        expr = self.expr()
+        self.eat(Class.RPAREN)
+        if self.curr.class_ == Class.COLON:
+            self.eat(Class.COLON)
+            total_characters = Int(self.curr.lexeme)
+            self.eat(Class.INT)
+        if self.curr.class_ == Class.COLON:
+            self.eat(Class.COLON)
+            places_after_dot = Int(self.curr.lexeme)
+            self.eat(Class.INT)
+
+        args.append(WriteArg(expr, total_characters, places_after_dot))
+
     def args(self):
         args = []
         while self.curr.class_ != Class.RPAREN:
             if len(args) > 0:
                 self.eat(Class.COMMA)
+            if self.is_write and self.curr.class_ == Class.LPAREN:
+                self.handle_write(args)
+                continue
             args.append(self.expr())
         return Args(args)
 
@@ -288,6 +348,10 @@ class Parser:
             value = String(self.curr.lexeme)
             self.eat(Class.STRING)
             return value
+        elif self.curr.class_ == Class.BOOL:
+            value = Bool(self.curr.lexeme)
+            self.eat(Class.BOOL)
+            return value
         elif self.curr.class_ == Class.ID:
             return self.id_()
         elif self.curr.class_ in [Class.MINUS, Class.NOT, Class.ADDRESS]:
@@ -313,7 +377,7 @@ class Parser:
 
     def term(self):
         first = self.factor()
-        while self.curr.class_ in [Class.STAR, Class.DIV, Class.MOD]:
+        while self.curr.class_ in [Class.STAR, Class.DIV, Class.MOD, Class.FWDSLASH]:
             if self.curr.class_ == Class.STAR:
                 op = self.curr.lexeme
                 self.eat(Class.STAR)
@@ -327,6 +391,11 @@ class Parser:
             elif self.curr.class_ == Class.MOD:
                 op = self.curr.lexeme
                 self.eat(Class.MOD)
+                second = self.factor()
+                first = BinOp(op, first, second)
+            elif self.curr.class_ == Class.FWDSLASH:
+                op = self.curr.lexeme
+                self.eat(Class.FWDSLASH)
                 second = self.factor()
                 first = BinOp(op, first, second)
         return first
@@ -402,17 +471,22 @@ class Parser:
     @restorable
     def is_func_call(self):
         try:
+            if self.prev.lexeme == 'write' or self.prev.lexeme == 'writeln':
+                self.is_write = True
             self.eat(Class.LPAREN)
             self.args()
             self.eat(Class.RPAREN)
+            self.is_write = False
             return self.curr.class_ != Class.BEGIN
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     def parse(self):
         return self.program()
 
     def die(self, text):
+        print(len(self.tokens))
         raise SystemExit(text)
 
     def die_deriv(self, fun):

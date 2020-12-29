@@ -49,6 +49,7 @@ class Class(Enum):
     FUNCTION = auto()
 
     IF = auto()
+    ELSEIF = auto()
     ELSE = auto()
     WHILE = auto()
     FOR = auto()
