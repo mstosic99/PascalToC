@@ -1,4 +1,4 @@
-from app.Node import LocalVars, ProcImpl
+from app.Node import LocalVars, ProcImpl, WriteArg, Program
 from app.Visitor import Visitor
 import re
 
@@ -157,6 +157,8 @@ class Generator(Visitor):
         self.visit(node, node.params)
         self.append(') {')
         self.newline()
+        self.visit(node, node.local_variables)
+        self.newline()
         self.visit(node, node.block)
         self.newline()
         self.append('}')
@@ -164,92 +166,106 @@ class Generator(Visitor):
 
     def visit_FuncCall(self, parent, node):
         func = node.id_.value
+        self.append(func)
+        self.append('(')
+        self.visit(node, node.args)
+        self.append(')')
+
+    def visit_ProcImpl(self, parent, node):
+        self.append('void ')
+        self.append(node.id_.value)
+        self.append('(')
+        self.visit(node, node.params)
+        self.append(') {')
+        self.newline()
+        self.visit(node, node.local_variables)
+        self.newline()
+        self.visit(node, node.block)
+        self.newline()
+        self.append('}')
+        self.newline()
+
+    def visit_ProcCall(self, parent, node):
+        proc = node.id_.value
         args = node.args.args
-        if func == 'printf':
-            format_ = args[0].value
-            matches = re.findall('%[dcs]', format_)
-            format_ = re.sub('%[dcs]', '{}', format_)
-            self.append('print("')
-            self.append(format_)
-            self.append('"')
-            if len(args) > 1:
-                self.append('.format(')
-                for i, a in enumerate(args[1:]):
-                    if i > 0:
-                        self.append(', ')
-                    if matches[i] == '%c':
-                        self.append('chr(')
-                        self.visit(node.args, a)
-                        self.append(')')
-                    elif matches[i] == '%s':
-                        self.append('"".join([chr(x) for x in ')
-                        self.visit(node.args, a)
-                        self.append('])')
-                    else:
-                        self.visit(node.args, a)
-                self.append(')')
-            self.append(', end="")')
-        elif func == 'scanf':
-            for i, a in enumerate(args[1:]):
+        symbols = parent.symbols
+        if proc == 'write':
+            self.append('printf("')
+            for i, n in enumerate(args[0:]):
                 if i > 0:
-                    self.append(', ')
-                self.visit(node.args, a)
-            self.append(' = input()')
-            if len(args[1:]) > 1:
-                self.append('.split()')
-            format_ = args[0].value
-            matches = re.findall('%[dcs]', format_)
-            for i, m in enumerate(matches):
-                if m == '%d':
-                    self.newline()
-                    self.indent()
-                    self.visit(node.args, args[i + 1])
-                    self.append(' = int(')
-                    self.visit(node.args, args[i + 1])
-                    self.append(')')
-                elif m == '%c':
-                    self.newline()
-                    self.indent()
-                    self.visit(node.args, args[i + 1])
-                    self.append(' = ord(')
-                    self.visit(node.args, args[i + 1])
-                    self.append('[0])')
-                elif m == '%s':
-                    self.newline()
-                    self.indent()
-                    self.visit(node.args, args[i + 1])
-                    self.append(' = [ord(x) for x in ')
-                    self.visit(node.args, args[i + 1])
-                    self.append(']')
-        elif func == 'strlen':
+                    self.append(' ')
+                self.append('%d')
+                # if symbols.get(n.value).type_ == 'char':
+                #     self.append('%c')
+                # elif symbols.get(n.value).type_ == 'integer' or symbols.get(n.value).type_ == 'boolean':
+                #     self.append('%d')
+                # elif symbols.get(n.value).type_ == 'string':
+                #     self.append('%s')
+                # elif symbols.get(n.value).type_ == 'float' or symbols.get(n.value).type_ == 'double':
+                #     if type(n) is WriteArg and n.total_characters is not None and n.places_after_dot is not None:
+                #         self.append('%{}.{}f'.format(n.total_characters.value, n.places_after_dot.value))
+                #     elif type(n) is WriteArg and n.total_characters is not None and n.places_after_dot is None:
+                #         self.append('%{}f'.format(n.total_characters))
+                #     elif type(n) is WriteArg and n.total_characters is None and n.places_after_dot is not None:
+                #         self.append('%.{}f'.format(n.places_after_dot))
+                #     else:
+                #         self.append('%f')
+            self.append('"')
+            if len(args) > 0:
+                self.append(', ')
+            self.visit(node, node.args)
+            self.append(')')
+        elif proc == 'readln':
+            self.append('scanf("')
+            for i, n in enumerate(args[0:]):
+                self.append('%d')
+            #     if symbols.get(n.value).type_ == 'char':
+            #         self.append('%c')
+            #     elif symbols.get(n.value).type_ == 'integer' or symbols.get(n.value).type_ == 'boolean':
+            #         self.append('%d')
+            #     elif symbols.get(n.value).type_ == 'string':
+            #         self.append('%s')
+            #     elif symbols.get(n.value).type_ == 'float' or symbols.get(n.value).type_ == 'double':
+            #         self.append('%f')
+            self.append('"')
+            if len(args) > 0:
+                self.append(', ')
+            self.visit(node, node.args)
+            self.append(')')
+        elif proc == 'strlen':
             self.append('len(')
             self.visit(node, node.args)
             self.append(')')
-        elif func == 'strcat':
+        elif proc == 'strcat':
             self.visit(node.args, args[0])
             self.append(' += ')
             self.visit(node.args, args[1])
             self.newline()
             self.indent()
         else:
-            self.append(func)
+            self.append(proc)
             self.append('(')
             self.visit(node, node.args)
             self.append(')')
-
-    def visit_ProcImpl(self, parent, node):
-        pass  # TODO
-
-    def visit_ProcCall(self, parent, node):
-        pass  # TODO
+        self.append(';')
+        self.newline()
 
     def visit_Block(self, parent, node):
+        if type(parent) is Program:
+            self.newline()
+            self.append('void main() {')
+            self.newline()
         self.level += 1
         for n in node.nodes:
             self.indent()
             self.visit(node, n)
             self.newline()
         self.level -= 1
+        if type(parent) is Program:
+            self.newline()
+            self.indent()
+            self.append('}')
+            self.newline()
 
     def visit_Params(self, parent, node):
         for i, p in enumerate(node.params):
@@ -264,10 +280,15 @@ class Generator(Visitor):
         for i, a in enumerate(node.args):
             if i > 0:
                 self.append(', ')
+            if parent.id_.value == 'readln':
+                self.append('&(')
+                self.visit(node, a)
+                self.append(')')
+                continue
             self.visit(node, a)
 
     def visit_WriteArg(self, parent, node):
-        pass  # TODO
+        self.visit(node, node.expr)
 
     def visit_Elems(self, parent, node):
         for i, e in enumerate(node.elems):

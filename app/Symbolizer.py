@@ -118,8 +118,8 @@ class Symbolizer(Visitor):
         pass
 
     def visit_Block(self, parent, node):
-        # node.symbols = Symbols()
-        setattr(node, 'symbols', Symbols())
+        node.symbols = Symbols()
+        # setattr(node, 'symbols', Symbols())
         for n in node.nodes:
             self.visit(node, n)
 
