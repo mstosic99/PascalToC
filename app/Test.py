@@ -13,7 +13,7 @@ from app.Grapher import Grapher
 from app.Lexer import Lexer
 from app.Parser import Parser
 
-test_id = 16
+test_id = 15
 # path = f'{getcwd()}/data/pas/test{test_id}.pas'
 path = f'{getcwd()}/data/pas2/{test_id}/src.pas'
 

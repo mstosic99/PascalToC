@@ -175,7 +175,11 @@ class Generator(Visitor):
 
     def visit_FuncCall(self, parent, node):
         func = node.id_.value
-        if func not in ('ord', 'chr'):
+        if func == 'length':
+            self.append('strlen(')
+            self.visit(node, node.args)
+            self.append(')')
+        elif func not in ('ord', 'chr'):
             self.append(func)
             self.append('(')
             self.visit(node, node.args)
@@ -276,13 +280,21 @@ class Generator(Visitor):
                 self.append(', ')
             self.visit(node, node.args)
             self.append(')')
-        elif proc == 'length':
-            self.append('strlen(')
-            self.visit(node, node.args)
-            self.append(')')
         elif proc == 'inc':
             self.visit(node.args, args[0])
             self.append(' += 1')
+        elif proc == 'insert':
+            if type(args[1]) is Id:
+                self.visit(node.args, args[1])
+            else:
+                self.visit(args[1], args[1].expr)
+            self.append('[')
+            if type(args[2]) is Id:
+                self.visit(node.args, args[2])
+            else:
+                self.visit(args[2], args[2].expr)
+            self.append('-1] = ')
+            self.visit(node.args, args[0])
         else:
             self.append(proc)
             self.append('(')
