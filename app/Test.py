@@ -13,7 +13,7 @@ from app.Grapher import Grapher
 from app.Lexer import Lexer
 from app.Parser import Parser
 
-test_id = 1
+test_id = 16
 # path = f'{getcwd()}/data/pas/test{test_id}.pas'
 path = f'{getcwd()}/data/pas2/{test_id}/src.pas'
 
@@ -30,10 +30,10 @@ with open(path, 'r') as source:
     symbolizer = Symbolizer(ast)
     symbolizer.symbolize()
 
-    # grapher = Grapher(ast)
-    # img = grapher.graph()
+    grapher = Grapher(ast)
+    img = grapher.graph()
 
     generator = Generator(ast)
     code = generator.generate('main.c')
 
-# Image(img)
+Image(img)

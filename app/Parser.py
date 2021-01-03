@@ -90,8 +90,8 @@ class Parser:
                     self.eat(Class.LPAREN)
                     elems = self.elems()
                     self.eat(Class.RPAREN)
-                variables.append(ArrayDecl(type_, ids[0], from_, to_, elems))
-
+                for e in ids:
+                    variables.append(ArrayDecl(type_, e, from_, to_, elems))
             self.eat(Class.SEMICOLON)
         return LocalVars(variables)
 
@@ -134,12 +134,13 @@ class Parser:
         self.eat(Class.ID)
         is_proc_call = is_proc_call and self.curr.class_ == Class.LPAREN
         if self.curr.class_ == Class.LPAREN and self.is_func_call():
+            self.is_write = False
             if self.prev.lexeme == 'write' or self.prev.lexeme == 'writeln':
                 self.is_write = True
             self.eat(Class.LPAREN)
             args = self.args()
             self.eat(Class.RPAREN)
-            self.is_write = False
+            self.is_write = True
             if is_proc_call:
                 return ProcCall(id_, args)
             else:
@@ -189,15 +190,18 @@ class Parser:
     def for_(self):
         self.eat(Class.FOR)
         init = self.id_()
+        is_to = None
         if self.curr.lexeme == 'to':
             self.eat(Class.TO)
+            is_to = True
         elif self.curr.lexeme == 'downto':
             self.eat(Class.DOWNTO)
+            is_to = False
         goal = self.expr()
         self.eat(Class.DO)
         block = self.block()
         self.eat(Class.SEMICOLON)
-        return For(init, goal, block)
+        return For(init, goal, block, is_to)
 
     def repeat_until(self):
         self.eat(Class.REPEAT)
@@ -275,11 +279,17 @@ class Parser:
         return Params(params)
 
     def handle_write(self, args):
-        total_characters = Int(10)
-        places_after_dot = Int(10)
-        self.eat(Class.LPAREN)
+        total_characters = None
+        places_after_dot = None
+        a = self.curr.class_ == Class.LPAREN
+        if self.curr.class_ == Class.LPAREN:
+            self.eat(Class.LPAREN)
         expr = self.expr()
-        self.eat(Class.RPAREN)
+        if self.curr.class_ == Class.RPAREN and a:
+            self.eat(Class.RPAREN)
+        if type(expr) == Char:
+            args.append(Char(expr.value))
+            return
         if self.curr.class_ == Class.COLON:
             self.eat(Class.COLON)
             total_characters = Int(self.curr.lexeme)
@@ -288,7 +298,6 @@ class Parser:
             self.eat(Class.COLON)
             places_after_dot = Int(self.curr.lexeme)
             self.eat(Class.INT)
-
         args.append(WriteArg(expr, total_characters, places_after_dot))
 
     def args(self):
@@ -296,7 +305,7 @@ class Parser:
         while self.curr.class_ != Class.RPAREN:
             if len(args) > 0:
                 self.eat(Class.COMMA)
-            if self.is_write and self.curr.class_ == Class.LPAREN:
+            if self.is_write:
                 self.handle_write(args)
                 continue
             args.append(self.expr())

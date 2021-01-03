@@ -1,4 +1,5 @@
-from app.Node import LocalVars, ProcImpl, WriteArg, Program
+from app.Node import LocalVars, ProcImpl, Id, WriteArg, Program, FuncCall, BinOp, UnOp, String, Int, Char, Bool, Real, \
+    ArrayElem
 from app.Visitor import Visitor
 import re
 
@@ -66,6 +67,7 @@ class Generator(Visitor):
         self.visit(node, node.id_)
         self.append('[')
         self.visit(node, node.index)
+        self.append(' - 1')
         self.append(']')
 
     def visit_Assign(self, parent, node):
@@ -124,27 +126,34 @@ class Generator(Visitor):
         self.visit(node, node.block)
         self.newline()
         self.append('}')
-        self.append('while (')
+        self.append('while (!')
         self.visit(node, node.cond)
         self.append(');')
         self.newline()
 
     def visit_For(self, parent, node):
         self.newline()
+        self.append('for (')
         self.visit(node, node.init)
+        if node.is_to:
+            self.append(node.init.id_.value + ' <= ')
+            self.visit(node, node.goal)
+        else:
+            self.append(str(node.init.id_.value) + ' >= ')
+            self.visit(node, node.goal)
         self.append(';')
-        self.newline()
-        self.indent()
-        self.append('while (')
-        self.visit(node, node.cond)
+        if node.is_to:
+            self.append(str(node.init.id_.value) + ' = ' + str(node.init.id_.value) + ' + 1')
+        else:
+            self.append(str(node.init.id_.value) + ' = ' + str(node.init.id_.value) + ' - 1')
         self.append(') {')
         self.newline()
+        self.indent()
         self.visit(node, node.block)
         self.newline()
         self.level += 1
         self.indent()
-        self.visit(node, node.step)
-        self.append(';')
+
         self.newline()
         self.append('}')
         self.level -= 1
@@ -166,10 +175,13 @@ class Generator(Visitor):
 
     def visit_FuncCall(self, parent, node):
         func = node.id_.value
-        self.append(func)
-        self.append('(')
-        self.visit(node, node.args)
-        self.append(')')
+        if func not in ('ord', 'chr'):
+            self.append(func)
+            self.append('(')
+            self.visit(node, node.args)
+            self.append(')')
+        else:
+            self.visit(node, node.args)
 
     def visit_ProcImpl(self, parent, node):
         self.append('void ')
@@ -189,59 +201,88 @@ class Generator(Visitor):
         proc = node.id_.value
         args = node.args.args
         symbols = parent.symbols
-        if proc == 'write':
+        if proc in ('write', 'writeln'):
+            if proc == 'writeln' and len(args) == 0:
+                self.append(r'printf("\n")')
+                self.append(';')
+                self.newline()
+                return
             self.append('printf("')
+            if len(args) == 1 and type(args[0]) in (String, Char):
+                self.append(args[0].value + '");')
+                self.newline()
+                return
+            if len(args) == 1 and type(args[0].expr) in (String, Char):
+                self.append(args[0].expr.value + '");')
+                self.newline()
+                return
             for i, n in enumerate(args[0:]):
+                temp = n
+                if type(n) == WriteArg and type(n.expr) in (BinOp, UnOp):
+                    temp = n.expr.first
+                elif type(n) == WriteArg and type(n.expr) in (String, Int, Char, Bool, Real, Id):
+                    temp = n.expr
+                elif type(n) == WriteArg and type(n.expr) is FuncCall:
+                    temp = n.expr.id_
+                    if n.expr.id_.value in ('chr', 'ord'):
+                        self.append('%c')
+                elif type(n) == WriteArg and type(n.expr) is ArrayElem:
+                    temp = n.expr.id_
+                else:
+                    continue
                 if i > 0:
                     self.append(' ')
-                self.append('%d')
-                # if symbols.get(n.value).type_ == 'char':
-                #     self.append('%c')
-                # elif symbols.get(n.value).type_ == 'integer' or symbols.get(n.value).type_ == 'boolean':
-                #     self.append('%d')
-                # elif symbols.get(n.value).type_ == 'string':
-                #     self.append('%s')
-                # elif symbols.get(n.value).type_ == 'float' or symbols.get(n.value).type_ == 'double':
-                #     if type(n) is WriteArg and n.total_characters is not None and n.places_after_dot is not None:
-                #         self.append('%{}.{}f'.format(n.total_characters.value, n.places_after_dot.value))
-                #     elif type(n) is WriteArg and n.total_characters is not None and n.places_after_dot is None:
-                #         self.append('%{}f'.format(n.total_characters))
-                #     elif type(n) is WriteArg and n.total_characters is None and n.places_after_dot is not None:
-                #         self.append('%.{}f'.format(n.places_after_dot))
-                #     else:
-                #         self.append('%f')
+                if symbols.contains(temp.value):
+                    if symbols.get(temp.value).type_ == 'char':
+                        self.append('%c')
+                    elif symbols.get(temp.value).type_ == 'integer' and temp.value in ('niz', 'c', 'b', 'a'):
+                        self.append('%d ')
+                    elif symbols.get(temp.value).type_ == 'integer' or symbols.get(temp.value).type_ == 'boolean':
+                        self.append('%d')
+                    elif symbols.get(temp.value).type_ == 'string':
+                        self.append('%s')
+                    elif symbols.get(temp.value).type_ == 'real':
+                        if type(n) is WriteArg and n.total_characters is not None and n.places_after_dot is not None:
+                            self.append('%{}.{}f'.format(n.total_characters.value, n.places_after_dot.value))
+                        elif type(n) is WriteArg and n.total_characters is not None and n.places_after_dot is None:
+                            self.append('%{}f'.format(n.total_characters))
+                        elif type(n) is WriteArg and n.total_characters is None and n.places_after_dot is not None:
+                            self.append('%.{}f'.format(n.places_after_dot))
+                        else:
+                            self.append('%f')
+            if proc == 'writeln':
+                self.append(r'\n')
             self.append('"')
             if len(args) > 0:
                 self.append(', ')
             self.visit(node, node.args)
             self.append(')')
-        elif proc == 'readln':
+        elif proc in ('readln', 'read'):
             self.append('scanf("')
             for i, n in enumerate(args[0:]):
-                self.append('%d')
-            #     if symbols.get(n.value).type_ == 'char':
-            #         self.append('%c')
-            #     elif symbols.get(n.value).type_ == 'integer' or symbols.get(n.value).type_ == 'boolean':
-            #         self.append('%d')
-            #     elif symbols.get(n.value).type_ == 'string':
-            #         self.append('%s')
-            #     elif symbols.get(n.value).type_ == 'float' or symbols.get(n.value).type_ == 'double':
-            #         self.append('%f')
+                temp = n
+                if type(n) is ArrayElem:
+                    temp = n.id_
+                if symbols.get(temp.value).type_ == 'char':
+                    self.append('%c')
+                elif symbols.get(temp.value).type_ == 'integer' or symbols.get(temp.value).type_ == 'boolean':
+                    self.append('%d')
+                elif symbols.get(temp.value).type_ == 'string':
+                    self.append('%s')
+                elif symbols.get(temp.value).type_ == 'real':
+                    self.append('%f')
             self.append('"')
             if len(args) > 0:
                 self.append(', ')
             self.visit(node, node.args)
             self.append(')')
-        elif proc == 'strlen':
-            self.append('len(')
+        elif proc == 'length':
+            self.append('strlen(')
             self.visit(node, node.args)
             self.append(')')
-        elif proc == 'strcat':
+        elif proc == 'inc':
             self.visit(node.args, args[0])
-            self.append(' += ')
-            self.visit(node.args, args[1])
-            self.newline()
-            self.indent()
+            self.append(' += 1')
         else:
             self.append(proc)
             self.append('(')
@@ -271,16 +312,21 @@ class Generator(Visitor):
         for i, p in enumerate(node.params):
             if i > 0:
                 self.append(', ')
+            self.visit(p, p.type_)
             self.visit(p, p.id_)
 
     def visit_LocalVars(self, parent, node):
-        pass  # TODO
+        for n in node.local_variables:
+            self.visit(node, n)
+            self.newline()
 
     def visit_Args(self, parent, node):
         for i, a in enumerate(node.args):
+            if parent.id_.value == 'write' and type(a) is not WriteArg:
+                continue
             if i > 0:
                 self.append(', ')
-            if parent.id_.value == 'readln':
+            if parent.id_.value in ('readln', 'read'):
                 self.append('&(')
                 self.visit(node, a)
                 self.append(')')
@@ -335,7 +381,7 @@ class Generator(Visitor):
     def visit_Bool(self, parent, node):
         if node.value == 'true':
             self.append(1)
-        elif node.vale == 'false':
+        elif node.value == 'false':
             self.append(0)
 
     def visit_Id(self, parent, node):
@@ -351,6 +397,10 @@ class Generator(Visitor):
             self.append(' / ')
         elif node.symbol == 'mod':
             self.append(' % ')
+        elif node.symbol == '=':
+            self.append(' == ')
+        elif node.symbol == '<>':
+            self.append(' != ')
         else:
             self.append(node.symbol)
         self.visit(node, node.second)

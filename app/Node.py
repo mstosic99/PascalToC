@@ -76,10 +76,11 @@ class RepeatUntil(Node):
 
 
 class For(Node):
-    def __init__(self, init, goal, block):
+    def __init__(self, init, goal, block, is_to):
         self.init = init
         self.goal = goal
         self.block = block
+        self.is_to = is_to
 
 
 class FuncImpl(Node):
