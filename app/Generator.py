@@ -239,7 +239,8 @@ class Generator(Visitor):
                 if symbols.contains(temp.value):
                     if symbols.get(temp.value).type_ == 'char':
                         self.append('%c')
-                    elif symbols.get(temp.value).type_ == 'integer' and temp.value in ('niz', 'c', 'b', 'a'):
+                    # elif symbols.get(temp.value).type_ == 'integer' and temp.value in ('niz', 'c', 'b', 'a'):
+                    elif symbols.get(temp.value).type_ == 'integer' and symbols.get(temp.value).is_array:
                         self.append('%d ')
                     elif symbols.get(temp.value).type_ == 'integer' or symbols.get(temp.value).type_ == 'boolean':
                         self.append('%d')

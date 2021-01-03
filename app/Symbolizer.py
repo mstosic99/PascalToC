@@ -3,24 +3,25 @@ from app.Visitor import Visitor
 
 
 class Symbol:
-    def __init__(self, id_, type_, scope):
+    def __init__(self, id_, type_, scope, is_array):
         self.id_ = id_
         self.type_ = type_
         self.scope = scope
+        self.is_array = is_array
 
     def __str__(self):
         return "<{} {} {}>".format(self.id_, self.type_, self.scope)
 
     def copy(self):
-        return Symbol(self.id_, self.type_, self.scope)
+        return Symbol(self.id_, self.type_, self.scope, self.is_array)
 
 
 class Symbols:
     def __init__(self):
         self.symbols = {}
 
-    def put(self, id_, type_, scope):
-        self.symbols[id_] = Symbol(id_, type_, scope)
+    def put(self, id_, type_, scope, is_array):
+        self.symbols[id_] = Symbol(id_, type_, scope, is_array)
 
     def get(self, id_):
         return self.symbols[id_]
@@ -59,16 +60,16 @@ class Symbolizer(Visitor):
             self.visit(node, n)
 
     def visit_Decl(self, parent, node):
-        parent.symbols.put(node.id_.value, node.type_.value, id(parent))
+        parent.symbols.put(node.id_.value, node.type_.value, id(parent), False)
 
     def visit_ArrayDecl(self, parent, node):
         # node.symbols = Symbols()
         # setattr(node, 'symbols', Symbols())
-        parent.symbols.put(node.id_.value, node.type_.value, id(parent))
+        parent.symbols.put(node.id_.value, node.type_.value, id(parent), True)
 
     def visit_StringDecl(self, parent, node):
         # node.symbols = Symbols()
-        parent.symbols.put(node.id_.value, node.type_.value, id(parent))
+        parent.symbols.put(node.id_.value, node.type_.value, id(parent), False)
 
     def visit_ArrayElem(self, parent, node):
         pass
@@ -79,7 +80,7 @@ class Symbolizer(Visitor):
     def visit_If(self, parent, node):
         node.symbols = Symbols()
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         self.visit(node, node.true)
         if node.elseifs is not None:
             for elseif in node.elseifs:
@@ -90,44 +91,44 @@ class Symbolizer(Visitor):
     def visit_ElseIf(self, parent, node):
         node.symbols = Symbols()
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         self.visit(node, node.true)
 
     def visit_Else(self, parent, node):
         node.symbols = Symbols()
         self.visit(node, node.block)
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         self.visit(node, node.block)
 
     def visit_While(self, parent, node):
         node.symbols = Symbols()
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         self.visit(node, node.block)
 
     def visit_RepeatUntil(self, parent, node):
         node.symbols = Symbols()
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         self.visit(node, node.block)
 
     def visit_For(self, parent, node):
         node.symbols = Symbols()
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         self.visit(node, node.block)
 
     def visit_FuncImpl(self, parent, node):
         node.symbols = Symbols()
-        parent.symbols.put(node.id_.value, node.type_.value, id(parent))
+        parent.symbols.put(node.id_.value, node.type_.value, id(parent), False)
         self.visit(node, node.block)
         self.visit(node, node.params)
         self.visit(node, node.local_variables)
 
     def visit_ProcImpl(self, parent, node):
         node.symbols = Symbols()
-        parent.symbols.put(node.id_.value, None, id(parent))
+        parent.symbols.put(node.id_.value, None, id(parent), False)
         self.visit(node, node.block)
         self.visit(node, node.params)
         self.visit(node, node.local_variables)
@@ -141,12 +142,12 @@ class Symbolizer(Visitor):
     def visit_Block(self, parent, node):
         node.symbols = Symbols()
         for s in parent.symbols:
-            node.symbols.put(s.id_, s.type_, id(parent))
+            node.symbols.put(s.id_, s.type_, id(parent), s.is_array)
         # setattr(node, 'symbols', Symbols())
         for n in node.nodes:
             self.visit(node, n)
         for s in node.symbols:
-            parent.symbols.put(s.id_, s.type_, id(parent))
+            parent.symbols.put(s.id_, s.type_, id(parent), s.is_array)
 
     def visit_Params(self, parent, node):
         node.symbols = Symbols()
@@ -154,7 +155,7 @@ class Symbolizer(Visitor):
             self.visit(node, p)
             self.visit(parent.block, p)
         for s in node.symbols:
-            parent.symbols.put(s.id_, s.type_, id(parent))
+            parent.symbols.put(s.id_, s.type_, id(parent), s.is_array)
 
     def visit_LocalVars(self, parent, node):
         node.symbols = Symbols()
@@ -167,7 +168,7 @@ class Symbolizer(Visitor):
             #         if type(n) is Block:
             #             self.visit(node, lv)
         for s in node.symbols:
-            parent.symbols.put(s.id_, s.type_, id(parent))
+            parent.symbols.put(s.id_, s.type_, id(parent), s.is_array)
 
     def visit_Args(self, parent, node):
         pass
